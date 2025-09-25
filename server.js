@@ -71,46 +71,17 @@ function requestLogger(req, res, next) {
   next();
 }
 
-// Axios instance with logging interceptors
+// Axios instance - only error logging
 const axiosInstance = axios.create();
-axiosInstance.interceptors.request.use((config) => {
-  config.metadata = { start: Date.now() };
-  console.log(JSON.stringify({
-    level: 'info',
-    type: 'upstream_request',
-    method: (config.method || 'post').toUpperCase(),
-    url: config.url,
-    headers: redactHeaders(config.headers || {}),
-    data: truncate(config.data)
-  }));
-  return config;
-});
 axiosInstance.interceptors.response.use((response) => {
-  const duration = response.config?.metadata ? Date.now() - response.config.metadata.start : undefined;
-  console.log(JSON.stringify({
-    level: 'info',
-    type: 'upstream_response',
-    status: response.status,
-    statusText: response.statusText,
-    duration_ms: duration
-  }));
   return response;
 }, (error) => {
-  const cfg = error.config || {};
-  const duration = cfg.metadata ? Date.now() - cfg.metadata.start : undefined;
-  console.error(JSON.stringify({
-    level: 'error',
-    type: 'upstream_error',
-    message: error.message,
-    status: error.response?.status,
-    data: truncate(error.response?.data),
-    duration_ms: duration
-  }));
+  console.error(`[ERROR] Upstream request failed: ${error.config?.url || 'unknown'} - ${error.message}`);
   return Promise.reject(error);
 });
 
 // Middleware to parse JSON bodies
-app.use(express.json());
+app.use(express.json({ limit: '1000mb' }));
 app.use(requestLogger);
 
 // Helpers to produce OpenAI-compatible responses
