@@ -355,7 +355,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`OpenAI-compatible API server running on port ${PORT}`);
   console.log(`Chat completions endpoint: http://localhost:${PORT}/v1/chat/completions`);
 });
