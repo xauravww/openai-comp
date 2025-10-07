@@ -262,7 +262,8 @@ app.post('/v1/chat/completions', async (req, res) => {
       'version': '1.1',
       'x-stainless-retry-count': '0',
       'Connection': 'close',
-      'x-request-id': req.id
+      'x-request-id': req.id,
+      'userid': '142678589-9626076655-7454352729-1817530871'
     };
 
     const response = await axiosInstance.post(
